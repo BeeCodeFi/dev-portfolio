@@ -93,10 +93,10 @@ export default function About() {
             {/* Portrait */}
             <div className="group relative h-60 w-60 overflow-hidden rounded-full border-2 border-white/10 shimmer-border md:h-72 md:w-72">
               <img
-                src={profile.dp}
+                src={profile.hero_dp}
                 alt={`${profile.name} portrait`}
                 loading="lazy"
-                className="h-full w-full object-cover saturate-[0.85] transition-all duration-[1.4s] ease-out group-hover:scale-105 group-hover:saturate-100"
+                className="w-full h-full object-cover object-[95%_10%] grayscale hover:grayscale-0 transition-all duration-700 ease-out scale-[1.1] hover:scale-100"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-violet/10" />
             </div>
