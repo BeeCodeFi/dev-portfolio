@@ -125,7 +125,7 @@ export default function Hero({ start }: { start: boolean }) {
           <img
             src={profile.hero_dp}
             alt={profile.name}
-            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-out scale-[1.15] -translate-x-6 hover:scale-[1.1] hover:-translate-x-4"
+            className="w-full h-full object-cover object-[75%_10%] grayscale hover:grayscale-0 transition-all duration-700 ease-out scale-[1.1] hover:scale-100"
           />
         </div>
 
