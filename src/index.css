@@ -1,3 +1,13 @@
+/* Fallback font sized to match Syne metrics — eliminates FOUT compression on deployed site */
+@font-face {
+  font-family: 'Syne Fallback';
+  src: local('Arial');
+  size-adjust: 105%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
 @import 'tailwindcss';
 
 @theme {
@@ -8,7 +18,7 @@
   --color-mist: #8a8796;
   --color-violet: #8b5cf6;
   --color-cyan: #22d3ee;
-  --font-display: 'Syne', system-ui, sans-serif;
+  --font-display: 'Syne', 'Syne Fallback', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
