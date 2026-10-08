@@ -120,6 +120,15 @@ export default function Hero({ start }: { start: boolean }) {
       <div className="pointer-events-none relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-10 md:px-10 md:pb-14">
 
 
+        {/* Right side Image (Desktop) */}
+        <div className="hero-fade absolute right-4 md:right-10 top-1/4 md:top-[30%] hidden md:block w-48 h-48 md:w-64 md:h-64 lg:w-[22rem] lg:h-[22rem] rounded-full overflow-hidden pointer-events-auto border-2 border-bone/10 shadow-[0_0_40px_rgba(139,92,246,0.15)] z-20">
+          <img 
+            src={profile.dp} 
+            alt={profile.name} 
+            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-out scale-105 hover:scale-100" 
+          />
+        </div>
+
         <h1 className="hero-title font-display font-extrabold leading-[0.92] tracking-[-0.02em] text-[16vw] md:text-[13vw]">
           <SplitWord text={profile.firstName} />
           <SplitWord text={profile.lastName} className="outline-text" />
