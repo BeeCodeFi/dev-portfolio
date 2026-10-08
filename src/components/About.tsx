@@ -43,18 +43,32 @@ export default function About() {
           </span>
         ))}
       </p>
-      <div className="about-aside mt-20 grid gap-10 border-t border-white/10 pt-10 md:grid-cols-3">
-        <div>
-          <div className="font-mono text-xs uppercase tracking-widest text-mist">Currently</div>
-          <div className="mt-2 text-lg">Software Engineer at Cybage Software</div>
+      <div className="about-aside mt-20 grid gap-10 border-t border-white/10 pt-10 md:grid-cols-[minmax(0,340px)_1fr] md:gap-16">
+        <div className="group relative aspect-square w-full max-w-[340px] overflow-hidden rounded-[2rem] border border-white/10">
+          <img
+            src={profile.dp}
+            alt={`${profile.name} portrait`}
+            loading="lazy"
+            className="h-full w-full object-cover saturate-[0.9] transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-violet/10" />
+          <div className="absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-widest text-bone/80">
+            {profile.name} — {profile.title}
+          </div>
         </div>
-        <div>
-          <div className="font-mono text-xs uppercase tracking-widest text-mist">Approach</div>
-          <div className="mt-2 text-lg">Agile delivery, test-first quality, performance by default</div>
-        </div>
-        <div>
-          <div className="font-mono text-xs uppercase tracking-widest text-mist">Toolkit</div>
-          <div className="mt-2 text-lg">React · Vue · Angular · .NET Core · Node · AWS</div>
+        <div className="flex flex-col justify-center gap-10">
+          <div>
+            <div className="font-mono text-xs uppercase tracking-widest text-mist">Currently</div>
+            <div className="mt-2 text-lg">Software Engineer at Cybage Software</div>
+          </div>
+          <div>
+            <div className="font-mono text-xs uppercase tracking-widest text-mist">Approach</div>
+            <div className="mt-2 text-lg">Agile delivery, test-first quality, performance by default</div>
+          </div>
+          <div>
+            <div className="font-mono text-xs uppercase tracking-widest text-mist">Toolkit</div>
+            <div className="mt-2 text-lg">React · Vue · Angular · .NET Core · Node · AWS</div>
+          </div>
         </div>
       </div>
     </section>

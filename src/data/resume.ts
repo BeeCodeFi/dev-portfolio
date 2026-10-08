@@ -1,4 +1,7 @@
+import dp from './dp.jpg'
+
 export const profile = {
+  dp,
   name: 'Ayush Kumar',
   firstName: 'Ayush',
   lastName: 'Kumar',
