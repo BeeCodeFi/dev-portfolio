@@ -121,7 +121,7 @@ export default function Hero({ start }: { start: boolean }) {
 
 
         {/* Right side Image (Desktop) */}
-        <div className="hero-fade absolute right-4 md:right-10 top-1/4 md:top-[30%] hidden md:block w-48 h-48 md:w-64 md:h-64 lg:w-[22rem] lg:h-[22rem] rounded-full overflow-hidden pointer-events-auto border-2 border-bone/10 shadow-[0_0_40px_rgba(139,92,246,0.15)] z-20">
+        <div className="hero-fade absolute right-4 md:right-10 lg:right-12 top-[45%] lg:top-[50%] -translate-y-1/2 hidden md:block w-48 h-48 md:w-72 md:h-72 lg:w-[28rem] lg:h-[28rem] rounded-full overflow-hidden pointer-events-auto border-2 border-bone/10 shadow-[0_0_40px_rgba(139,92,246,0.15)] z-20">
           <img
             src={profile.hero_dp}
             alt={profile.name}
