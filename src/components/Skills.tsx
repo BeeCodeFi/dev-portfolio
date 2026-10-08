@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap, prefersReducedMotion } from '../hooks/motion'
 import { skills } from '../data/resume'
-import { RevealHeading, SectionLabel, SectionTag, useScramble } from './shared'
+import { SectionLabel, useScramble } from './shared'
 
 const all = skills.flatMap((s) => s.items)
 const rowA = all.slice(0, Math.ceil(all.length / 2))

@@ -59,7 +59,7 @@ export function SectionLabel({ index, children }: { index: string; children: Rea
         height: '1px',
         width: '48px',
         flexShrink: 0,
-        background: 'linear-gradient(to right, rgba(139,92,246,0.7), transparent)'
+        background: 'linear-gradient(to right, rgba(139,92,246,0.85), rgba(34,211,238,0.6))'
       }} />
       <span>{children}</span>
     </div>

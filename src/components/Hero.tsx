@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, prefersReducedMotion, scrollToTarget } from '../hooks/motion'
 import { profile } from '../data/resume'
 import { Magnetic } from './shared'

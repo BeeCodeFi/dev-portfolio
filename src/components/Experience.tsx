@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap, prefersReducedMotion } from '../hooks/motion'
 import { experience } from '../data/resume'
-import { RevealHeading, SectionLabel, SectionTag, useScramble } from './shared'
+import { SectionLabel, useScramble } from './shared'
 
 export default function Experience() {
   const root = useRef<HTMLElement>(null)

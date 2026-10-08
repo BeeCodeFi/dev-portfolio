@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, prefersReducedMotion, scrollToTarget } from '../hooks/motion'
 import { profile } from '../data/resume'
-import { Magnetic, SectionTag, useScramble } from './shared'
+import { useScramble } from './shared'
 
 const socials = [
   { label: 'LinkedIn', href: profile.linkedin },

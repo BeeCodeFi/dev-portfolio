@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap, prefersReducedMotion } from '../hooks/motion'
 import { profile } from '../data/resume'
-import { SectionLabel, SectionTag, useScramble } from './shared'
+import { SectionLabel, useScramble } from './shared'
 
 const highlight = new Set(['scalable', 'enterprise', 'reusable', 'AWS.', 'AI', 'production', 'stability.'])
 
