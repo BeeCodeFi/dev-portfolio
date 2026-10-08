@@ -1,7 +1,9 @@
 import dp from './dp.jpg'
+import hero_dp from './hero_dp.jpg'
 
 export const profile = {
   dp,
+  hero_dp,
   name: 'Ayush Kumar',
   firstName: 'Ayush',
   lastName: 'Kumar',
