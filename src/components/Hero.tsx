@@ -129,7 +129,7 @@ export default function Hero({ start }: { start: boolean }) {
           />
         </div>
 
-        <h1 className="hero-title font-display font-extrabold leading-[0.92] tracking-[-0.02em] text-[16vw] md:text-[13vw]">
+        <h1 className="hero-title font-display font-extrabold leading-[0.92] tracking-[-0.02em] text-[16vw] md:text-[11vw]">
           <SplitWord text={profile.firstName} />
           <SplitWord text={profile.lastName} className="outline-text" />
         </h1>
