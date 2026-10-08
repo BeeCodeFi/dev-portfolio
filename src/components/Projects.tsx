@@ -19,54 +19,54 @@ function TiltCard({ project, index }: { project: Project; index: number }) {
 
   return (
     <div className="project-card w-full shrink-0 md:w-[min(78vw,1040px)]">
-    <motion.article
-      data-cursor="View"
-      onPointerMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect()
-        mx.set((e.clientX - r.left) / r.width)
-        my.set((e.clientY - r.top) / r.height)
-      }}
-      onPointerLeave={() => {
-        mx.set(0.5)
-        my.set(0.5)
-      }}
-      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-ink-2 md:flex-row"
-    >
-      <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:w-[55%]">
-        <div className="absolute inset-0 transition-transform duration-[1.2s] ease-out group-hover:scale-110">
-          <ProjectArt motif={project.motif} palette={project.palette} />
-        </div>
-        <div className="absolute left-6 top-6 font-display text-8xl font-extrabold text-white/10">0{index + 1}</div>
-        {project.tag && (
-          <span className="absolute right-6 top-6 rounded-full border border-white/20 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-widest backdrop-blur">
-            {project.tag}
-          </span>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-7 md:p-10">
-        <h3 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">{project.title}</h3>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {project.stack.map((s) => (
-            <span key={s} className="rounded-full px-3 py-1 font-mono text-[11px]" style={{ background: `${project.palette[0]}1f`, color: project.palette[0] }}>
-              {s}
+      <motion.article
+        data-cursor="View"
+        onPointerMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect()
+          mx.set((e.clientX - r.left) / r.width)
+          my.set((e.clientY - r.top) / r.height)
+        }}
+        onPointerLeave={() => {
+          mx.set(0.5)
+          my.set(0.5)
+        }}
+        style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }}
+        className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-ink-2 md:flex-row"
+      >
+        <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:w-[55%]">
+          <div className="absolute inset-0 transition-transform duration-[1.2s] ease-out group-hover:scale-110">
+            <ProjectArt motif={project.motif} palette={project.palette} />
+          </div>
+          <div className="absolute left-6 top-6 font-display text-8xl font-extrabold text-white/10">0{index + 1}</div>
+          {project.tag && (
+            <span className="absolute right-6 top-6 rounded-full border border-white/20 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-widest backdrop-blur">
+              {project.tag}
             </span>
-          ))}
+          )}
         </div>
-        <ul className="mt-6 space-y-3 text-bone/80">
-          {project.points.map((p, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="mt-2.5 h-1 w-3 shrink-0 rounded-full" style={{ background: project.palette[1] }} />
-              <span>{p}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: glare }}
-      />
-    </motion.article>
+        <div className="flex flex-1 flex-col p-7 md:p-10">
+          <h3 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">{project.title}</h3>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {project.stack.map((s) => (
+              <span key={s} className="rounded-full px-3 py-1 font-mono text-[11px]" style={{ background: `${project.palette[0]}1f`, color: project.palette[0] }}>
+                {s}
+              </span>
+            ))}
+          </div>
+          <ul className="mt-6 space-y-3 text-bone/80">
+            {project.points.map((p, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="mt-2.5 h-1 w-3 shrink-0 rounded-full" style={{ background: project.palette[1] }} />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <motion.div
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{ background: glare }}
+        />
+      </motion.article>
     </div>
   )
 }
@@ -124,7 +124,7 @@ export default function Projects() {
     <section id="projects" ref={root} className="relative overflow-hidden py-24 md:flex md:h-svh md:flex-col md:justify-center md:py-0">
       <div className="mx-auto mb-12 flex w-full max-w-7xl items-end justify-between px-4 md:mb-10 md:px-10">
         <div>
-          <SectionLabel index="04">Act II — Selected Work</SectionLabel>
+          <SectionLabel index="04">Selected Work</SectionLabel>
           <h2 className="mt-6 font-display text-5xl font-extrabold tracking-tight md:text-7xl">
             The <span className="text-gradient">reel.</span>
           </h2>

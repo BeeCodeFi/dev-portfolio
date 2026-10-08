@@ -1,5 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { gsap, prefersReducedMotion } from '../hooks/motion'
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { gsap, ScrollTrigger, prefersReducedMotion } from '../hooks/motion'
 
 /** Pulls its child toward the cursor while hovered, then springs back. */
 export function Magnetic({ children, strength = 0.35 }: { children: ReactNode; strength?: number }) {
@@ -7,17 +7,14 @@ export function Magnetic({ children, strength = 0.35 }: { children: ReactNode; s
   useEffect(() => {
     const el = ref.current
     if (!el || prefersReducedMotion()) return
-    const x = gsap.quickTo(el, 'x', { duration: 0.6, ease: 'elastic.out(1, 0.4)' })
-    const y = gsap.quickTo(el, 'y', { duration: 0.6, ease: 'elastic.out(1, 0.4)' })
+    const x = gsap.quickTo(el, 'x', { duration: 0.55, ease: 'elastic.out(1, 0.4)' })
+    const y = gsap.quickTo(el, 'y', { duration: 0.55, ease: 'elastic.out(1, 0.4)' })
     const move = (e: PointerEvent) => {
       const r = el.getBoundingClientRect()
       x((e.clientX - (r.left + r.width / 2)) * strength)
       y((e.clientY - (r.top + r.height / 2)) * strength)
     }
-    const leave = () => {
-      x(0)
-      y(0)
-    }
+    const leave = () => { x(0); y(0) }
     el.addEventListener('pointermove', move)
     el.addEventListener('pointerleave', leave)
     return () => {
@@ -25,41 +22,119 @@ export function Magnetic({ children, strength = 0.35 }: { children: ReactNode; s
       el.removeEventListener('pointerleave', leave)
     }
   }, [strength])
+  return <div ref={ref} className="inline-block">{children}</div>
+}
+
+/** "// Tag" style section label — borrowed from template */
+export function SectionTag({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    gsap.set(ref.current, { opacity: 0, x: -12 })
+  }, [])
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    gsap.to(ref.current, {
+      opacity: 1, x: 0, duration: 0.7, ease: 'power3.out',
+      scrollTrigger: { trigger: ref.current, start: 'top 93%', toggleActions: 'play none none none' },
+    })
+  }, [])
   return (
-    <div ref={ref} className="inline-block">
-      {children}
-    </div>
+    <span ref={ref} className="font-mono text-sm text-cyan/80">
+      {'// '}{children}
+    </span>
   )
 }
 
 /** Numbered chapter label used at the top of each section. */
 export function SectionLabel({ index, children }: { index: string; children: ReactNode }) {
   return (
-    <div className="reveal-label flex items-center gap-4 font-mono text-xs uppercase tracking-[0.3em] text-mist">
+    <div
+      className="flex items-center gap-4 font-mono text-xs uppercase tracking-[0.3em] text-mist"
+      style={{ animation: 'sectionLabelIn 0.9s cubic-bezier(0.16,1,0.3,1) both' }}
+    >
       <span className="text-gradient font-medium">{index}</span>
-      <span className="h-px w-12 bg-white/20" />
+      <span style={{
+        display: 'block',
+        height: '1px',
+        width: '48px',
+        flexShrink: 0,
+        background: 'linear-gradient(to right, rgba(139,92,246,0.7), transparent)'
+      }} />
       <span>{children}</span>
     </div>
   )
 }
 
-/** Large heading whose lines slide up from a mask when scrolled into view. */
+/**
+ * Text scramble hook — borrowed from template.
+ * Scrambles random chars then resolves to the real text.
+ */
+export function useScramble(text: string, trigger: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    const el = trigger.current
+    if (!el) return
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&'
+    const st = ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => {
+        let iterations = 0
+        const interval = setInterval(() => {
+          el.textContent = text
+            .split('')
+            .map((char, index) => {
+              if (index < iterations) return text[index]
+              if (char === ' ') return ' '
+              return chars[Math.floor(Math.random() * chars.length)]
+            })
+            .join('')
+          iterations += 1 / 3
+          if (iterations >= text.length) {
+            el.textContent = text
+            clearInterval(interval)
+          }
+        }, 30)
+      },
+    })
+    return () => st.kill()
+  }, [text, trigger])
+}
+
+/**
+ * Large heading whose lines slide up from a mask when scrolled into view.
+ * Pre-hides with useLayoutEffect, then animates with gsap.to() — no restart jump.
+ */
 export function RevealHeading({ lines, className = '' }: { lines: ReactNode[]; className?: string }) {
   const ref = useRef<HTMLHeadingElement>(null)
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    const els = ref.current?.querySelectorAll('.rh-line')
+    if (els) gsap.set(els, { yPercent: 110, rotate: 1.5 })
+  }, [])
+
   useEffect(() => {
     if (prefersReducedMotion()) return
     const ctx = gsap.context(() => {
-      gsap.from('.rh-line', {
-        yPercent: 105,
-        rotate: 2,
-        duration: 1.2,
-        stagger: 0.1,
+      gsap.to('.rh-line', {
+        yPercent: 0,
+        rotate: 0,
+        duration: 1.3,
+        stagger: 0.12,
         ease: 'expo.out',
-        scrollTrigger: { trigger: ref.current, start: 'top 85%' },
+        scrollTrigger: {
+          trigger: ref.current,
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        },
       })
     }, ref)
     return () => ctx.revert()
   }, [])
+
   return (
     <h2 ref={ref} className={`font-display font-extrabold leading-[0.95] tracking-tight ${className}`}>
       {lines.map((l, i) => (

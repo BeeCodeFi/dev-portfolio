@@ -1,9 +1,7 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { gsap, prefersReducedMotion, scrollToTarget } from '../hooks/motion'
 import { profile } from '../data/resume'
 import { Magnetic } from './shared'
-
-const HeroScene = lazy(() => import('./HeroScene'))
 
 function SplitWord({ text, className = '' }: { text: string; className?: string }) {
   return (
@@ -29,10 +27,10 @@ function RoleTicker() {
         ease: 'power2.in',
         onComplete: () => {
           setI((n) => (n + 1) % profile.roles.length)
-          gsap.fromTo(el.current, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'power3.out' })
+          gsap.fromTo(el.current, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, ease: 'power3.out' })
         },
       })
-    }, 2600)
+    }, 2800)
     return () => clearInterval(id)
   }, [])
   return (
@@ -46,44 +44,24 @@ function RoleTicker() {
 
 export default function Hero({ start }: { start: boolean }) {
   const root = useRef<HTMLElement>(null)
-  const pointer = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
-    const move = (e: PointerEvent) => {
-      pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1
-      pointer.current.y = -((e.clientY / window.innerHeight) * 2 - 1)
-    }
-    window.addEventListener('pointermove', move)
-    return () => window.removeEventListener('pointermove', move)
-  }, [])
-
-  // Hide intro elements until the preloader hands over.
-  useLayoutEffect(() => {
     if (prefersReducedMotion()) return
     gsap.set(root.current!.querySelectorAll('.hero-char'), { yPercent: 110 })
-    gsap.set(root.current!.querySelectorAll('.hero-fade'), { opacity: 0, y: 20 })
-    gsap.set(root.current!.querySelector('.hero-canvas'), { opacity: 0, scale: 0.7 })
+    gsap.set(root.current!.querySelectorAll('.hero-fade'), { opacity: 0, y: 24 })
   }, [])
 
   useEffect(() => {
     if (!start || prefersReducedMotion()) return
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.1 })
-      tl.to('.hero-canvas', { opacity: 1, scale: 1, duration: 2.2, ease: 'expo.out' })
-        .to('.hero-char', { yPercent: 0, duration: 1.3, stagger: 0.035, ease: 'expo.out' }, 0.2)
-        .to('.hero-fade', { opacity: 1, y: 0, duration: 1, stagger: 0.1, ease: 'power3.out' }, 0.9)
+      const tl = gsap.timeline({ delay: 0.15 })
+      tl.to('.hero-char', { yPercent: 0, duration: 1.4, stagger: 0.032, ease: 'expo.out' }, 0)
+        .to('.hero-fade', { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, ease: 'power3.out' }, 0.6)
 
-      // Exit: as you scroll away the title drifts up and the orb pushes back.
+      // Title drifts up on scroll exit only
       gsap.to('.hero-title', {
         yPercent: -30,
-        opacity: 0.1,
-        ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true },
-      })
-      gsap.to('.hero-canvas', {
-        scale: 0.6,
-        opacity: 0,
-        yPercent: 20,
+        opacity: 0.05,
         ease: 'none',
         scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true },
       })
@@ -93,17 +71,55 @@ export default function Hero({ start }: { start: boolean }) {
 
   return (
     <section id="top" ref={root} className="relative h-svh min-h-[640px] w-full overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(139,92,246,0.18),transparent_60%)]" />
-      <div className="hero-canvas absolute inset-0">
-        <Suspense fallback={null}>
-          <HeroScene pointer={pointer} />
-        </Suspense>
-      </div>
 
+      {/* ── Pure-CSS animated background ── */}
+      <div className="absolute inset-0 bg-ink" />
+
+      {/* Large slow-drifting ambient blobs */}
+      <div
+        className="absolute h-[70vw] w-[70vw] rounded-full opacity-30"
+        style={{
+          background: 'radial-gradient(circle, rgba(139,92,246,0.55) 0%, transparent 70%)',
+          top: '-15%',
+          right: '-10%',
+          animation: 'blobA 18s ease-in-out infinite alternate',
+        }}
+      />
+      <div
+        className="absolute h-[55vw] w-[55vw] rounded-full opacity-20"
+        style={{
+          background: 'radial-gradient(circle, rgba(34,211,238,0.6) 0%, transparent 70%)',
+          bottom: '-20%',
+          left: '-15%',
+          animation: 'blobB 22s ease-in-out infinite alternate',
+        }}
+      />
+      <div
+        className="absolute h-[40vw] w-[40vw] rounded-full opacity-15"
+        style={{
+          background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+          top: '30%',
+          left: '30%',
+          animation: 'blobC 14s ease-in-out infinite alternate',
+        }}
+      />
+
+      {/* Subtle grid overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.025]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+        }}
+      />
+
+      {/* Noise texture overlay */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'300\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.75\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
+
+      {/* Content */}
       <div className="pointer-events-none relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-10 md:px-10 md:pb-14">
-        <div className="hero-fade mb-6 font-mono text-xs uppercase tracking-[0.3em] text-mist">
-          Portfolio — Vol. 01 / {new Date().getFullYear()}
-        </div>
+
+
         <h1 className="hero-title font-display font-extrabold leading-[0.85] tracking-[-0.04em] text-[16vw] md:text-[13vw]">
           <SplitWord text={profile.firstName} />
           <SplitWord text={profile.lastName} className="outline-text md:pl-[12vw]" />
@@ -118,20 +134,37 @@ export default function Hero({ start }: { start: boolean }) {
             <Magnetic>
               <button
                 onClick={() => scrollToTarget('#projects')}
-                className="rounded-full bg-bone px-7 py-4 text-sm font-semibold text-ink transition hover:bg-white"
+                className="flex items-center gap-2 rounded-full bg-bone px-7 py-4 text-sm font-semibold text-ink transition-all duration-300 hover:bg-white hover:shadow-[0_0_30px_rgba(237,233,226,0.3)]"
               >
-                View work
+                <span>View work</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
               </button>
             </Magnetic>
             <Magnetic>
               <a
                 href={`mailto:${profile.email}`}
-                className="rounded-full border border-white/20 px-7 py-4 text-sm font-semibold transition hover:border-white/60"
+                className="rounded-full border border-white/20 px-7 py-4 text-sm font-semibold transition-all duration-300 hover:border-violet/60 hover:bg-violet/10 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)]"
               >
                 Get in touch
               </a>
             </Magnetic>
           </div>
+        </div>
+
+        {/* Hero stats — from template */}
+        <div className="hero-fade mt-8 flex gap-8 border-t border-white/10 pt-6">
+          {[
+            { value: '3+', label: 'Years Exp.' },
+            { value: '20+', label: 'Projects' },
+            { value: '10+', label: 'Technologies' },
+          ].map((s) => (
+            <div key={s.label} className="flex flex-col">
+              <span className="font-display text-3xl font-extrabold text-gradient">{s.value}</span>
+              <span className="mt-0.5 font-mono text-xs uppercase tracking-widest text-mist">{s.label}</span>
+            </div>
+          ))}
         </div>
         <div className="hero-fade mt-10 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-mist">
           <span className="relative block h-8 w-px overflow-hidden bg-white/15">
@@ -140,7 +173,28 @@ export default function Hero({ start }: { start: boolean }) {
           Scroll to begin
         </div>
       </div>
-      <style>{`@keyframes scrollcue{0%{transform:translateY(-100%)}100%{transform:translateY(200%)}}`}</style>
+
+      <style>{`
+        @keyframes blobA {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(-4%, 6%) scale(1.12); }
+          100% { transform: translate(6%, -4%) scale(0.92); }
+        }
+        @keyframes blobB {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(6%, -5%) scale(1.08); }
+          100% { transform: translate(-4%, 7%) scale(0.95); }
+        }
+        @keyframes blobC {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(3%, 4%) scale(1.15); }
+          100% { transform: translate(-5%, -3%) scale(0.9); }
+        }
+        @keyframes scrollcue {
+          0%   { transform: translateY(-100%); }
+          100% { transform: translateY(200%); }
+        }
+      `}</style>
     </section>
   )
 }

@@ -24,8 +24,7 @@ float snoise(vec3 v){
   vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
   p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
   vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;
-  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-}`
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}`
 
 const vertex = /* glsl */ `
 uniform float uTime;
@@ -35,27 +34,35 @@ varying vec3 vNormal;
 varying vec3 vView;
 ${noise}
 void main(){
-  float n = snoise(normal * 1.4 + uTime * 0.25);
-  float n2 = snoise(normal * 3.5 - uTime * 0.4) * 0.3;
-  float d = (n + n2) * (0.22 + uHover * 0.18);
+  float n  = snoise(normal * 1.6 + uTime * 0.22);
+  float n2 = snoise(normal * 4.0 - uTime * 0.38) * 0.28;
+  float n3 = snoise(normal * 0.8 + uTime * 0.12) * 0.15;
+  float d  = (n + n2 + n3) * (0.20 + uHover * 0.22);
   vNoise = n;
   vec3 pos = position + normal * d;
-  vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-  vNormal = normalize(normalMatrix * normal);
-  vView = normalize(-mv.xyz);
+  vec4 mv  = modelViewMatrix * vec4(pos, 1.0);
+  vNormal  = normalize(normalMatrix * normal);
+  vView    = normalize(-mv.xyz);
   gl_Position = projectionMatrix * mv;
 }`
 
 const fragment = /* glsl */ `
 uniform vec3 uA;
 uniform vec3 uB;
+uniform vec3 uC;
+uniform float uTime;
 varying float vNoise;
 varying vec3 vNormal;
 varying vec3 vView;
 void main(){
-  float fres = pow(1.0 - max(dot(vNormal, vView), 0.0), 2.5);
-  vec3 col = mix(uA, uB, smoothstep(-0.6, 0.8, vNoise));
-  col = col * (0.25 + 0.5 * smoothstep(-0.2, 1.0, vNoise)) + fres * mix(uB, vec3(1.0), 0.3) * 1.2;
+  float fres = pow(1.0 - max(dot(vNormal, vView), 0.0), 2.8);
+  float t    = smoothstep(-0.6, 0.9, vNoise);
+  vec3 col   = mix(uA, uB, t);
+  col        = mix(col, uC, smoothstep(0.5, 1.0, t) * 0.35);
+  col        = col * (0.22 + 0.6 * smoothstep(-0.3, 1.0, vNoise))
+             + fres * mix(uB, vec3(1.0), 0.4) * 1.4;
+  // subtle time-based shimmer
+  col       += 0.03 * sin(uTime * 2.0 + vNoise * 8.0);
   gl_FragColor = vec4(col, 1.0);
 }`
 
@@ -63,10 +70,11 @@ function Orb({ pointer }: { pointer: React.RefObject<{ x: number; y: number }> }
   const mesh = useRef<THREE.Mesh>(null)
   const uniforms = useMemo(
     () => ({
-      uTime: { value: 0 },
+      uTime:  { value: 0 },
       uHover: { value: 0 },
-      uA: { value: new THREE.Color('#5b21b6') },
-      uB: { value: new THREE.Color('#22d3ee') },
+      uA: { value: new THREE.Color('#4c1d95') },   // deep purple
+      uB: { value: new THREE.Color('#7c3aed') },   // violet
+      uC: { value: new THREE.Color('#06b6d4') },   // cyan accent
     }),
     [],
   )
@@ -74,42 +82,78 @@ function Orb({ pointer }: { pointer: React.RefObject<{ x: number; y: number }> }
     const p = pointer.current!
     uniforms.uTime.value += dt
     const dist = Math.min(1, Math.hypot(p.x, p.y))
-    uniforms.uHover.value = THREE.MathUtils.lerp(uniforms.uHover.value, 1 - dist, 0.05)
+    uniforms.uHover.value = THREE.MathUtils.lerp(uniforms.uHover.value, 1 - dist * 0.6, 0.06)
     if (mesh.current) {
-      mesh.current.rotation.y += dt * 0.12
-      mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, p.y * 0.4, 0.05)
-      mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, p.x * 0.3, 0.05)
+      mesh.current.rotation.y += dt * 0.1
+      mesh.current.rotation.z += dt * 0.03
+      mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, p.y * 0.45, 0.05)
+      mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, p.x * 0.35, 0.05)
+      mesh.current.position.y = THREE.MathUtils.lerp(mesh.current.position.y, p.y * 0.15, 0.04)
     }
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, p.x * 0.6, 0.04)
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, p.y * 0.4, 0.04)
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, p.x * 0.5, 0.04)
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, p.y * 0.35, 0.04)
     state.camera.lookAt(0, 0, 0)
   })
   return (
     <mesh ref={mesh}>
-      <icosahedronGeometry args={[1.35, 64]} />
+      <icosahedronGeometry args={[1.38, 80]} />
       <shaderMaterial vertexShader={vertex} fragmentShader={fragment} uniforms={uniforms} />
     </mesh>
   )
 }
 
-function Particles({ count = 1800 }: { count?: number }) {
+/** Outer halo ring that slowly rotates around the orb */
+function Ring() {
+  const ref = useRef<THREE.Mesh>(null)
+  useFrame((_, dt) => {
+    if (ref.current) {
+      ref.current.rotation.x += dt * 0.15
+      ref.current.rotation.z += dt * 0.08
+    }
+  })
+  return (
+    <mesh ref={ref} rotation={[Math.PI / 2.8, 0, 0]}>
+      <torusGeometry args={[2.1, 0.008, 8, 120]} />
+      <meshBasicMaterial color="#8b5cf6" transparent opacity={0.35} />
+    </mesh>
+  )
+}
+
+/** Second faint ring, slower, different plane */
+function Ring2() {
+  const ref = useRef<THREE.Mesh>(null)
+  useFrame((_, dt) => {
+    if (ref.current) {
+      ref.current.rotation.y += dt * 0.06
+      ref.current.rotation.x += dt * 0.04
+    }
+  })
+  return (
+    <mesh ref={ref} rotation={[Math.PI / 5, 0.4, 0]}>
+      <torusGeometry args={[2.55, 0.005, 8, 120]} />
+      <meshBasicMaterial color="#22d3ee" transparent opacity={0.22} />
+    </mesh>
+  )
+}
+
+function Particles({ count = 2200 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null)
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      const r = 2.4 + Math.random() * 4
+      const r = 2.6 + Math.random() * 4.5
       const t = Math.random() * Math.PI * 2
       const p = Math.acos(2 * Math.random() - 1)
-      arr[i * 3] = r * Math.sin(p) * Math.cos(t)
-      arr[i * 3 + 1] = r * Math.sin(p) * Math.sin(t) * 0.6
+      arr[i * 3]     = r * Math.sin(p) * Math.cos(t)
+      arr[i * 3 + 1] = r * Math.sin(p) * Math.sin(t) * 0.55
       arr[i * 3 + 2] = r * Math.cos(p)
     }
     return arr
   }, [count])
   useFrame((_, dt) => {
     if (ref.current) {
-      ref.current.rotation.y -= dt * 0.03
-      ref.current.rotation.z += dt * 0.01
+      ref.current.rotation.y -= dt * 0.025
+      ref.current.rotation.z += dt * 0.012
     }
   })
   return (
@@ -117,15 +161,17 @@ function Particles({ count = 1800 }: { count?: number }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.018} color="#c4b5fd" transparent opacity={0.7} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.016} color="#c4b5fd" transparent opacity={0.65} sizeAttenuation depthWrite={false} />
     </points>
   )
 }
 
 export default function HeroScene({ pointer }: { pointer: React.RefObject<{ x: number; y: number }> }) {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true }}>
+    <Canvas camera={{ position: [0, 0, 5.2], fov: 44 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true }}>
       <Orb pointer={pointer} />
+      <Ring />
+      <Ring2 />
       <Particles />
     </Canvas>
   )
