@@ -1,5 +1,5 @@
 import dp from './dp.jpg'
-import hero_dp from './hero_dp.jpg'
+import hero_dp from './hero_dp.png'
 
 export const profile = {
   dp,
