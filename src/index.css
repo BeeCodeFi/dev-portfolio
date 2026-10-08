@@ -1,10 +1,10 @@
 /* Fallback font sized to match Syne metrics — eliminates FOUT compression on deployed site */
 @font-face {
-  font-family: 'Syne Fallback';
+  font-family: 'Outfit Fallback';
   src: local('Arial');
-  size-adjust: 105%;
-  ascent-override: 95%;
-  descent-override: 25%;
+  size-adjust: 100%;
+  ascent-override: 94%;
+  descent-override: 24%;
   line-gap-override: 0%;
 }
 
@@ -18,7 +18,7 @@
   --color-mist: #8a8796;
   --color-violet: #8b5cf6;
   --color-cyan: #22d3ee;
-  --font-display: 'Syne', 'Syne Fallback', system-ui, sans-serif;
+  --font-display: 'Outfit', 'Outfit Fallback', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
