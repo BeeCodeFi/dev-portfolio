@@ -76,7 +76,7 @@ body {
 
 .outline-text {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(237, 233, 226, 0.55);
+  -webkit-text-stroke: 3px rgba(237, 233, 226, 0.75);
 }
 
 /* line mask for reveals */
