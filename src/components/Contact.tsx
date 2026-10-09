@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { gsap, prefersReducedMotion, scrollToTarget } from '../hooks/motion'
+import { gsap, prefersReducedMotion, scrollToTarget, isIOS } from '../hooks/motion'
 import { profile } from '../data/resume'
 import { useScramble } from './shared'
 
@@ -19,11 +19,12 @@ export default function Contact() {
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
     const items = root.current?.querySelectorAll('.cta-social, .cta-footer')
-    if (items) gsap.set(items, { y: 30, opacity: 0 })
+    if (items) gsap.set(items, { y: 30, opacity: 0, force3D: !isIOS() })
   }, [])
 
   useEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.cta-row',
@@ -31,19 +32,28 @@ export default function Contact() {
         {
           xPercent: (i) => (i % 2 ? 5 : -8),
           ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
+          force3D,
+          scrollTrigger: { 
+            trigger: root.current, 
+            start: 'top bottom', 
+            end: 'bottom top', 
+            scrub: isIOS() ? 0.5 : true,
+          },
         },
       )
       gsap.from('.cta-orb', {
         scale: 0, duration: 1.6, ease: 'elastic.out(1, 0.45)', immediateRender: false,
+        force3D,
         scrollTrigger: { trigger: '.cta-orb', start: 'top 85%' },
       })
       gsap.to('.cta-social', {
         y: 0, opacity: 1, stagger: 0.08, duration: 0.9, ease: 'power3.out',
+        force3D,
         scrollTrigger: { trigger: '.cta-socials', start: 'top 85%', toggleActions: 'play none none none' },
       })
       gsap.to('.cta-footer', {
         opacity: 1, y: 0, duration: 1, ease: 'power2.out',
+        force3D,
         scrollTrigger: { trigger: '.cta-footer', start: 'top 95%', toggleActions: 'play none none none' },
       })
     }, root)
@@ -52,9 +62,26 @@ export default function Contact() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    const formData = new FormData(e.currentTarget)
+    const name = formData.get('name') as string
+    const email = formData.get('email') as string
+    const subject = formData.get('subject') as string
+    const message = formData.get('message') as string
+    
+    // Format message for WhatsApp
+    const whatsappMessage = `*New Contact Form Submission*%0A%0A*Name:* ${encodeURIComponent(name)}%0A*Email:* ${encodeURIComponent(email)}%0A*Subject:* ${encodeURIComponent(subject)}%0A%0A*Message:*%0A${encodeURIComponent(message)}`
+    
+    // WhatsApp number (remove any spaces, dashes, or special characters)
+    const whatsappNumber = '917004900272' // Country code + your number
+    
+    // Open WhatsApp with pre-filled message
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
+    window.open(whatsappURL, '_blank')
+    
     setSent(true)
     setTimeout(() => setSent(false), 3000)
-      ; (e.target as HTMLFormElement).reset()
+    ;(e.target as HTMLFormElement).reset()
   }
 
   return (
