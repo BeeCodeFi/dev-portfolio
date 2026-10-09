@@ -28,6 +28,16 @@ html {
   color: var(--color-bone);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* iOS-specific fixes for better animation performance */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iOS viewport height fix */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen,
+  [style*="height: 100vh"] {
+    min-height: -webkit-fill-available;
+  }
 }
 
 html.lenis,
@@ -211,5 +221,46 @@ body {
   .marquee-track,
   .ambient-blob {
     animation: none;
+  }
+}
+
+/* ── iOS-specific performance fixes ─────────────────────────── */
+@supports (-webkit-touch-callout: none) {
+  /* Force hardware acceleration on iOS */
+  .hero-char,
+  .hero-fade,
+  .hero-title,
+  .project-card,
+  .rh-line,
+  .mask {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+
+  /* Fix for iOS scroll jank */
+  * {
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Optimize animations on iOS */
+  @keyframes blobA, blobB, blobC {
+    0%, 100% {
+      -webkit-transform: translate3d(0, 0, 0) scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      -webkit-transform: translate3d(-4%, 6%, 0) scale(1.12);
+      transform: translate3d(-4%, 6%, 0) scale(1.12);
+    }
+  }
+
+  /* Disable hover effects on iOS touch devices */
+  .glow-hover:hover,
+  .shimmer-border:hover::before {
+    transition: none;
   }
 }

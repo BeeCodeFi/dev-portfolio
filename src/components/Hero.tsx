@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { gsap, prefersReducedMotion, scrollToTarget } from '../hooks/motion'
+import { gsap, prefersReducedMotion, scrollToTarget, isIOS } from '../hooks/motion'
 import { profile } from '../data/resume'
 import { Magnetic } from './shared'
 
@@ -47,30 +47,44 @@ export default function Hero({ start }: { start: boolean }) {
 
   useEffect(() => {
     if (prefersReducedMotion()) return
-    gsap.set(root.current!.querySelectorAll('.hero-char'), { yPercent: 110 })
-    gsap.set(root.current!.querySelectorAll('.hero-fade'), { opacity: 0, y: 24 })
+    // Use force3D:false on iOS to avoid 3D transform bugs
+    const force3D = !isIOS()
+    gsap.set(root.current!.querySelectorAll('.hero-char'), { yPercent: 110, force3D })
+    gsap.set(root.current!.querySelectorAll('.hero-fade'), { opacity: 0, y: 24, force3D })
   }, [])
 
   useEffect(() => {
     if (!start || prefersReducedMotion()) return
+    const force3D = !isIOS()
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.15 })
-      tl.to('.hero-char', { yPercent: 0, duration: 1.4, stagger: 0.032, ease: 'expo.out' }, 0)
-        .to('.hero-fade', { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, ease: 'power3.out' }, 0.6)
+      tl.to('.hero-char', { yPercent: 0, duration: 1.4, stagger: 0.032, ease: 'expo.out', force3D }, 0)
+        .to('.hero-fade', { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, ease: 'power3.out', force3D }, 0.6)
 
       // Title drifts up on scroll exit only
       gsap.to('.hero-title', {
         yPercent: -30,
         opacity: 0.05,
         ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true },
+        force3D,
+        scrollTrigger: { 
+          trigger: root.current, 
+          start: 'top top', 
+          end: 'bottom top', 
+          scrub: true,
+          // iOS-specific fixes
+          ...(isIOS() && { 
+            scrub: 0.5, // Less aggressive scrubbing on iOS
+            invalidateOnRefresh: true 
+          })
+        },
       })
     }, root)
     return () => ctx.revert()
   }, [start])
 
   return (
-    <section id="top" ref={root} className="relative h-svh min-h-[640px] w-full overflow-hidden">
+    <section id="top" ref={root} className="relative min-h-[640px] w-full overflow-hidden" style={{ height: '100vh' }}>
 
       {/* ── Pure-CSS animated background ── */}
       <div className="absolute inset-0 bg-ink" />
@@ -202,6 +216,15 @@ export default function Hero({ start }: { start: boolean }) {
         @keyframes scrollcue {
           0%   { transform: translateY(-100%); }
           100% { transform: translateY(200%); }
+        }
+        /* iOS-specific fixes */
+        @supports (-webkit-touch-callout: none) {
+          .hero-char, .hero-fade {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+          }
         }
       `}</style>
     </section>

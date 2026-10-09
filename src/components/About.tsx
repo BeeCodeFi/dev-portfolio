@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { gsap, prefersReducedMotion } from '../hooks/motion'
+import { gsap, prefersReducedMotion, isIOS } from '../hooks/motion'
 import { profile } from '../data/resume'
 import { SectionLabel, useScramble } from './shared'
 
@@ -13,11 +13,12 @@ export default function About() {
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
     const items = root.current?.querySelectorAll('.about-detail')
-    if (items) gsap.set(items, { y: 30, opacity: 0 })
+    if (items) gsap.set(items, { y: 30, opacity: 0, force3D: !isIOS() })
   }, [])
 
   useEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const ctx = gsap.context(() => {
       // Word-by-word reveal on scrub
       gsap.fromTo(
@@ -27,24 +28,37 @@ export default function About() {
           opacity: 1,
           stagger: 0.07,
           ease: 'none',
-          scrollTrigger: { trigger: '.about-text', start: 'top 80%', end: 'bottom 40%', scrub: true },
+          scrollTrigger: { 
+            trigger: '.about-text', 
+            start: 'top 80%', 
+            end: 'bottom 40%', 
+            scrub: isIOS() ? 0.5 : true,
+          },
         },
       )
       // Portrait + rings slide in
       gsap.from('.about-portrait-wrap', {
         x: -50, opacity: 0, rotate: -2, duration: 1.4, ease: 'expo.out',
+        force3D,
         immediateRender: false,
         scrollTrigger: { trigger: '.about-aside', start: 'top 88%', toggleActions: 'play none none none' },
       })
       // Detail items stagger up
       gsap.to('.about-detail', {
         y: 0, opacity: 1, stagger: 0.14, duration: 1, ease: 'power3.out',
+        force3D,
         scrollTrigger: { trigger: '.about-aside', start: 'top 85%', toggleActions: 'play none none none' },
       })
       // Portrait floats upward on scroll
       gsap.to('.about-portrait-wrap', {
         y: -20, ease: 'none',
-        scrollTrigger: { trigger: '.about-aside', start: 'top bottom', end: 'bottom top', scrub: true },
+        force3D,
+        scrollTrigger: { 
+          trigger: '.about-aside', 
+          start: 'top bottom', 
+          end: 'bottom top', 
+          scrub: isIOS() ? 0.5 : true,
+        },
       })
     }, root)
     return () => ctx.revert()

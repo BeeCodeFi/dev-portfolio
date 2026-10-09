@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react'
-import { gsap, prefersReducedMotion } from '../hooks/motion'
+import { gsap, prefersReducedMotion, isIOS } from '../hooks/motion'
 import { projects, type Project } from '../data/resume'
 import ProjectArt from './ProjectArt'
 import { SectionLabel } from './shared'
@@ -8,6 +8,10 @@ import { SectionLabel } from './shared'
 function TiltCard({ project, index }: { project: Project; index: number }) {
   const mx = useMotionValue(0.5)
   const my = useMotionValue(0.5)
+  
+  // Disable 3D tilt on iOS to prevent rendering issues
+  const enableTilt = !isIOS()
+  
   const rx = useSpring(useTransform(my, [0, 1], [8, -8]), { stiffness: 150, damping: 18 })
   const ry = useSpring(useTransform(mx, [0, 1], [-10, 10]), { stiffness: 150, damping: 18 })
   const glareX = useTransform(mx, [0, 1], ['0%', '100%'])
@@ -22,15 +26,21 @@ function TiltCard({ project, index }: { project: Project; index: number }) {
       <motion.article
         data-cursor="View"
         onPointerMove={(e) => {
+          if (!enableTilt) return
           const r = e.currentTarget.getBoundingClientRect()
           mx.set((e.clientX - r.left) / r.width)
           my.set((e.clientY - r.top) / r.height)
         }}
         onPointerLeave={() => {
+          if (!enableTilt) return
           mx.set(0.5)
           my.set(0.5)
         }}
-        style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }}
+        style={enableTilt ? { 
+          rotateX: rx, 
+          rotateY: ry, 
+          transformPerspective: 1200 
+        } : {}}
         className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-ink-2 md:flex-row"
       >
         <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:w-[55%]">
@@ -77,6 +87,7 @@ export default function Projects() {
 
   useEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const mm = gsap.matchMedia()
     mm.add('(min-width: 768px)', () => {
       const el = track.current!
@@ -84,19 +95,27 @@ export default function Projects() {
       const tween = gsap.to(el, {
         x: () => -distance(),
         ease: 'none',
+        force3D,
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
           end: () => `+=${distance()}`,
           pin: true,
-          scrub: 1,
+          scrub: isIOS() ? 0.5 : 1, // Gentler scrubbing on iOS
           invalidateOnRefresh: true,
+          anticipatePin: 1,
         },
       })
       gsap.to('.reel-progress', {
         scaleX: 1,
         ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: () => `+=${distance()}`, scrub: true },
+        force3D,
+        scrollTrigger: { 
+          trigger: root.current, 
+          start: 'top top', 
+          end: () => `+=${distance()}`, 
+          scrub: isIOS() ? 0.5 : true,
+        },
       })
       // Each card leans in as it crosses the frame.
       gsap.utils.toArray<HTMLElement>('.project-card').forEach((card) => {
@@ -107,21 +126,39 @@ export default function Projects() {
             scale: 1,
             opacity: 1,
             ease: 'none',
-            scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left 90%', end: 'left 30%', scrub: true },
+            force3D,
+            scrollTrigger: { 
+              trigger: card, 
+              containerAnimation: tween, 
+              start: 'left 90%', 
+              end: 'left 30%', 
+              scrub: isIOS() ? 0.5 : true,
+            },
           },
         )
       })
     })
     mm.add('(max-width: 767px)', () => {
       gsap.utils.toArray<HTMLElement>('.project-card').forEach((card) => {
-        gsap.from(card, { y: 80, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: card, start: 'top 85%' } })
+        gsap.from(card, { 
+          y: 80, 
+          opacity: 0, 
+          duration: 1, 
+          ease: 'expo.out', 
+          force3D,
+          scrollTrigger: { 
+            trigger: card, 
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          } 
+        })
       })
     })
     return () => mm.revert()
   }, [])
 
   return (
-    <section id="projects" ref={root} className="relative overflow-hidden py-24 md:flex md:h-svh md:flex-col md:justify-center md:py-0">
+    <section id="projects" ref={root} className="relative overflow-hidden py-24 md:flex md:flex-col md:justify-center md:py-0" style={{ minHeight: isIOS() ? '100vh' : 'auto' }}>
       <div className="mx-auto mb-12 flex w-full max-w-7xl items-end justify-between px-4 md:mb-10 md:px-10">
         <div>
           <SectionLabel index="04">Selected Work</SectionLabel>

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { gsap, prefersReducedMotion } from '../hooks/motion'
+import { gsap, prefersReducedMotion, isIOS } from '../hooks/motion'
 import { stats } from '../data/resume'
 
 export default function Stats() {
@@ -8,15 +8,17 @@ export default function Stats() {
   // Pre-hide cards before first paint
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const cards = root.current?.querySelectorAll('.stat-card')
-    if (cards) gsap.set(cards, { y: 100, opacity: 0, rotateX: -30, scale: 0.9 })
+    if (cards) gsap.set(cards, { y: 100, opacity: 0, rotateX: isIOS() ? 0 : -30, scale: 0.9, force3D })
   }, [])
 
   useEffect(() => {
+    const force3D = !isIOS()
     const ctx = gsap.context(() => {
       if (prefersReducedMotion()) return
 
-      // Cards fly in with 3D flip
+      // Cards fly in with 3D flip (disabled on iOS)
       gsap.to('.stat-card', {
         y: 0,
         opacity: 1,
@@ -25,6 +27,7 @@ export default function Stats() {
         stagger: 0.1,
         duration: 1.3,
         ease: 'expo.out',
+        force3D,
         scrollTrigger: { trigger: root.current, start: 'top 78%', toggleActions: 'play none none none' },
       })
 

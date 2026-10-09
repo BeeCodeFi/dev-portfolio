@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { gsap, prefersReducedMotion } from '../hooks/motion'
+import { gsap, prefersReducedMotion, isIOS } from '../hooks/motion'
 import { skills } from '../data/resume'
 import { SectionLabel, useScramble } from './shared'
 
@@ -36,20 +36,28 @@ export default function Skills() {
   // Pre-hide cards and chips before first paint
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const cards = root.current?.querySelectorAll('.skill-group')
     const chips = root.current?.querySelectorAll('.skill-chip')
-    if (cards) gsap.set(cards, { y: 60, opacity: 0, scale: 0.96 })
-    if (chips) gsap.set(chips, { y: 25, opacity: 0, scale: 0.85 })
+    if (cards) gsap.set(cards, { y: 60, opacity: 0, scale: 0.96, force3D })
+    if (chips) gsap.set(chips, { y: 25, opacity: 0, scale: 0.85, force3D })
   }, [])
 
   useEffect(() => {
     if (prefersReducedMotion()) return
+    const force3D = !isIOS()
     const ctx = gsap.context(() => {
       // Marquee section rotates subtly on scroll
       gsap.to('.skill-marquees', {
         rotate: -3,
         ease: 'none',
-        scrollTrigger: { trigger: '.skill-marquees', start: 'top bottom', end: 'bottom top', scrub: true },
+        force3D,
+        scrollTrigger: { 
+          trigger: '.skill-marquees', 
+          start: 'top bottom', 
+          end: 'bottom top', 
+          scrub: isIOS() ? 0.5 : true,
+        },
       })
       // Cards stagger in
       gsap.utils.toArray<HTMLElement>('.skill-group').forEach((g, i) => {
@@ -60,6 +68,7 @@ export default function Skills() {
           duration: 1,
           delay: i * 0.05,
           ease: 'expo.out',
+          force3D,
           scrollTrigger: { trigger: g, start: 'top 88%', toggleActions: 'play none none none' },
         })
         // Chips cascade in after card
@@ -70,6 +79,7 @@ export default function Skills() {
           stagger: 0.04,
           duration: 0.6,
           ease: 'back.out(2)',
+          force3D,
           scrollTrigger: { trigger: g, start: 'top 85%', toggleActions: 'play none none none' },
         })
       })

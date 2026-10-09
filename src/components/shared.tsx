@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
-import { gsap, ScrollTrigger, prefersReducedMotion } from '../hooks/motion'
+import { gsap, ScrollTrigger, prefersReducedMotion, isIOS } from '../hooks/motion'
 
 /** Pulls its child toward the cursor while hovered, then springs back. */
 export function Magnetic({ children, strength = 0.35 }: { children: ReactNode; strength?: number }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = ref.current
-    if (!el || prefersReducedMotion()) return
+    // Disable magnetic effect on iOS/touch devices to avoid issues
+    if (!el || prefersReducedMotion() || isIOS()) return
     const x = gsap.quickTo(el, 'x', { duration: 0.55, ease: 'elastic.out(1, 0.4)' })
     const y = gsap.quickTo(el, 'y', { duration: 0.55, ease: 'elastic.out(1, 0.4)' })
     const move = (e: PointerEvent) => {
@@ -30,12 +31,12 @@ export function SectionTag({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null)
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
-    gsap.set(ref.current, { opacity: 0, x: -12 })
+    gsap.set(ref.current, { opacity: 0, x: -12, force3D: !isIOS() })
   }, [])
   useEffect(() => {
     if (prefersReducedMotion()) return
     gsap.to(ref.current, {
-      opacity: 1, x: 0, duration: 0.7, ease: 'power3.out',
+      opacity: 1, x: 0, duration: 0.7, ease: 'power3.out', force3D: !isIOS(),
       scrollTrigger: { trigger: ref.current, start: 'top 93%', toggleActions: 'play none none none' },
     })
   }, [])
@@ -113,7 +114,7 @@ export function RevealHeading({ lines, className = '' }: { lines: ReactNode[]; c
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
     const els = ref.current?.querySelectorAll('.rh-line')
-    if (els) gsap.set(els, { yPercent: 110, rotate: 1.5 })
+    if (els) gsap.set(els, { yPercent: 110, rotate: 1.5, force3D: !isIOS() })
   }, [])
 
   useEffect(() => {
@@ -125,6 +126,7 @@ export function RevealHeading({ lines, className = '' }: { lines: ReactNode[]; c
         duration: 1.3,
         stagger: 0.12,
         ease: 'expo.out',
+        force3D: !isIOS(),
         scrollTrigger: {
           trigger: ref.current,
           start: 'top 88%',

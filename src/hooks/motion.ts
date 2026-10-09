@@ -8,6 +8,11 @@ gsap.registerPlugin(ScrollTrigger)
 export const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+export const isIOS = () => 
+  typeof window !== 'undefined' && 
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
+   (navigator.userAgent.includes('Mac') && 'ontouchend' in document))
+
 let lenis: Lenis | null = null
 
 export const getLenis = () => lenis
@@ -15,7 +20,8 @@ export const getLenis = () => lenis
 /** Inertial scrolling driven by the GSAP ticker so ScrollTrigger stays in sync. */
 export function useSmoothScroll(enabled: boolean) {
   useEffect(() => {
-    if (!enabled || prefersReducedMotion()) return
+    // Disable smooth scroll on iOS devices as it causes issues
+    if (!enabled || prefersReducedMotion() || isIOS()) return
     lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1 })
     lenis.on('scroll', ScrollTrigger.update)
     const tick = (time: number) => lenis?.raf(time * 1000)
